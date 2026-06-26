@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <h1 class="title">Quick Index Checker</h1>
+        </div>
+        <button id="settingsBtn" class="icon-btn" title="Options">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab Switcher -->
+    <div class="tab-bar">
+      <button class="tab active" data-tab="page">Page</button>
+      <button class="tab" data-tab="bulk">Bulk Check</button>
+    </div>
+
+    <!-- Page Tab -->
+    <div id="tab-page" class="tab-content active">
+      <div class="input-group">
+        <label class="input-label">Current Page URL</label>
+        <div class="url-display" id="currentUrl">—</div>
+      </div>
+      <button id="checkPageBtn" class="btn btn-primary">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 11 12 14 22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Check This Page
+      </button>
+    </div>
+
+    <!-- Bulk Tab -->
+    <div id="tab-bulk" class="tab-content">
+      <div class="input-group">
+        <label class="input-label">Paste URLs (one per line)</label>
+        <textarea id="bulkInput" class="bulk-input" placeholder="https://example.com/page1&#10;https://example.com/page2&#10;https://example.com/page3" rows="5"></textarea>
+        <div class="url-count" id="urlCount">0 URLs</div>
+      </div>
+      <button id="checkBulkBtn" class="btn btn-primary">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 11 12 14 22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Check All
+      </button>
+    </div>
+
+    <!-- Progress (hidden by default) -->
+    <div id="progressArea" class="progress-area hidden">
+      <div class="progress-header">
+        <span id="progressText">Checking...</span>
+        <span id="progressCount">0/0</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsArea" class="results-area hidden">
+      <div class="results-header">
+        <h2 class="results-title">Results</h2>
+        <div class="results-actions">
+          <button id="exportCsvBtn" class="btn btn-sm btn-secondary">Export CSV</button>
+          <button id="clearResultsBtn" class="btn btn-sm btn-ghost">Clear</button>
+        </div>
+      </div>
+      <div class="results-summary" id="resultsSummary"></div>
+      <div class="results-list" id="resultsList"></div>
+    </div>
+
+    <!-- CAPTCHA Notification (hidden) -->
+    <div id="captchaNotice" class="captcha-notice hidden">
+      <div class="captcha-content">
+        <span class="captcha-icon">🛡️</span>
+        <span id="captchaText">Google verification required. Complete the CAPTCHA in the new tab, then come back.</span>
+      </div>
+      <button id="captchaDismiss" class="btn btn-sm btn-ghost">OK</button>
+    </div>
+
+    <!-- Affiliate Nudge (hidden) -->
+    <div id="affiliateNudge" class="affiliate-nudge hidden">
+      <p class="nudge-text" id="nudgeText"></p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Made with ❤️ — Free &amp; Private</span>
+    </footer>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
