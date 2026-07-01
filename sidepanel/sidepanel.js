@@ -77,7 +77,9 @@ function switchTab(tabName) {
   $$(".tab-panel").forEach((c) => c.classList.remove("active"));
   $(`.tab[data-tab="${tabName}"]`).classList.add("active");
   $(`#tab-${tabName}`).classList.add("active");
-  clearResults();
+
+  // Don't clear results — they're shared across tabs.
+  // Only clearResults() is called at the start of checkPage/checkBulk.
 
   if (tabName === "history") {
     loadHistory();
