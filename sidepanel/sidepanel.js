@@ -92,7 +92,6 @@ async function loadCurrentPage() {
   if (tabs[0].url && !tabs[0].url.startsWith("chrome://")) {
     state.currentUrl = tabs[0].url;
     $("#currentUrl").textContent = state.currentUrl;
-    analyzePage(state.currentTabId);
   }
 }
 
@@ -111,38 +110,6 @@ async function refreshPage() {
     btn.classList.remove("spinning");
     btn.style.color = "var(--danger)";
     setTimeout(() => { btn.style.color = ""; }, 800);
-  }
-}
-
-// === Page Analysis (noindex detection via content script) ===
-async function analyzePage(tabId) {
-  if (!tabId) return;
-
-  try {
-    const results = await chrome.scripting.executeScript({
-      target: { tabId },
-      func: () => {
-        const metas = document.querySelectorAll('meta[name="robots"], meta[name="googlebot"]');
-        let noindex = false;
-        metas.forEach((m) => {
-          const c = (m.getAttribute("content") || "").toLowerCase();
-          if (c.includes("noindex")) noindex = true;
-        });
-        return { noindex };
-      },
-    });
-
-    if (results && results[0]?.result) {
-      const analysis = $("#pageAnalysis");
-      analysis.classList.remove("hidden");
-      if (results[0].result.noindex) {
-        $("#noindexBadge").innerHTML = `<span class="meta-badge warn">⚠ This page has a noindex tag</span>`;
-      } else {
-        $("#noindexBadge").innerHTML = `<span class="meta-badge no">✓ Indexable (no noindex tag)</span>`;
-      }
-    }
-  } catch (e) {
-    console.debug("Page analysis skipped:", e.message);
   }
 }
 
@@ -208,9 +175,14 @@ async function checkBulk() {
   state.isChecking = true;
   clearResults();
 
+  // Show progress bar
+  $("#progressArea").classList.remove("hidden");
+  updateProgress(0, urls.length);
+
   await runBulkLoop(urls, 0);
 
-  finishBulk();
+  // Only finish if not interrupted by CAPTCHA
+  if (!bulkResume) finishBulk();
 }
 
 // Resume after CAPTCHA — continues from saved index
@@ -230,7 +202,8 @@ async function continueBulk() {
 
   await runBulkLoop(urls, index);
 
-  finishBulk();
+  // Only finish if not interrupted by CAPTCHA again
+  if (!bulkResume) finishBulk();
 }
 
 async function runBulkLoop(urls, startIndex) {
@@ -240,18 +213,20 @@ async function runBulkLoop(urls, startIndex) {
     try {
       const result = await checkUrl(urls[i]);
       state.results.push(result);
+      // Stream result live — user sees each URL appear as it's checked
+      showResults("bulk");
     } catch (err) {
       if (err.message === "CAPTCHA") {
         // Save state so user can resume after solving CAPTCHA
         bulkResume = { urls, index: i, total: urls.length };
-        // Show partial results so user sees progress
-        showResults("bulk");
+        showResults("bulk"); // Show partial results
         showCaptchaNotice(urls[i], "bulk");
         setLoading($("#checkBulkBtn"), false);
         state.isChecking = false;
         return; // Stop here, user will continueBulk() after CAPTCHA
       }
       state.results.push({ url: urls[i], indexed: false, error: err.message });
+      showResults("bulk");
     }
 
     if (i < urls.length - 1) {
