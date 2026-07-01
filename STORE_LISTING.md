@@ -4,7 +4,7 @@
 Quick Index Checker — Free Google Index Status Tool
 
 ## Short Description (132 chars max)
-Instantly check if any URL is indexed by Google. Bulk check, sitemap import, CSV export. 100% free, no signup, no data collection.
+Instantly check if any URL is indexed by Google. Bulk check, sitemap import, CAPTCHA auto-resume, CSV export. 100% free, private.
 
 ## Detailed Description
 Quick Index Checker is a free, privacy-first Chrome extension that tells you whether any webpage is indexed by Google — in one click.
@@ -23,8 +23,8 @@ Paste any sitemap.xml URL and auto-import all listed URLs into the bulk checker.
 **Right-Click Context Menu**
 Right-click any link or page → "Check if indexed on Google." Opens directly in the side panel.
 
-**CAPTCHA Recovery**
-If Google asks for verification, the extension saves your progress. Complete the CAPTCHA in the opened tab, click "Continue Checking," and resume exactly where you left off — no lost work.
+**CAPTCHA Auto-Resume** 🛡️
+If Google asks for verification, we save your progress. Complete the CAPTCHA once, click "Continue Checking," and resume exactly where you left off — no lost work, no starting over. Many index checkers don't handle this at all.
 
 **CSV Export**
 Export all results with URL and index status for reporting or further analysis.
