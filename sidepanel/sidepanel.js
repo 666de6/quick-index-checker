@@ -236,11 +236,17 @@ async function checkBulk() {
   }
 }
 
-// === Check Single URL (simple site: search) ===
-// Core logic: site: URL → if Google returns results → indexed.
-// "No results" patterns → not indexed. Simple, reliable, no false-negatives.
+// === Check Single URL (site: search via gbv=1 server-rendered HTML) ===
+// gbv=1 forces Google to return server-rendered HTML (no JS required).
+// This is critical: without gbv=1, fetch() gets a JS skeleton with no result text.
+//
+// Detection logic (layered, most reliable first):
+//   1. Explicit "no results" text → NOT indexed
+//   2. Positive result indicators (id="search", class="g", etc.) → indexed
+//   3. Cite tag contains URL → indexed
+//   4. Fallback: if no "no results" text found, lean indexed
 async function checkUrl(url) {
-  const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en`;
+  const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en&gbv=1`;
 
   const response = await fetch(searchUrl, {
     headers: {
@@ -265,17 +271,47 @@ async function checkUrl(url) {
     throw new Error("CAPTCHA");
   }
 
-  // "No results" patterns — Google shows these when nothing is indexed
+  // Layer 1: Explicit "no results" patterns
+  // Google displays these in the page body when nothing is indexed
   const noResults =
-    html.includes("No results found for") ||
     html.includes("did not match any documents") ||
+    html.includes("No results found for") ||
     html.includes("did not match any") ||
-    (html.includes("Your search -") && html.includes("- did not match any"));
+    (html.includes("Your search") && html.includes("did not match"));
 
-  // Simple, reliable logic:
-  // site: operator only returns results for indexed pages.
-  // If no "no results" patterns → indexed.
-  return { url, indexed: !noResults };
+  if (noResults) {
+    return { url, indexed: false };
+  }
+
+  // Layer 2: Positive indicators — Google result page structure
+  const hasResults =
+    html.includes('id="search"') ||
+    html.includes('class="g "') ||
+    html.includes('id="rso"') ||
+    html.includes('id="result-stats"') ||
+    html.includes('<h3 class="') ||
+    html.includes('data-hveid');
+
+  if (hasResults) {
+    return { url, indexed: true };
+  }
+
+  // Layer 3: Check if URL appears in cite/result area
+  // This catches cases where Google shows results but without the standard DOM structure
+  const norm = normalizeUrl(url);
+  if (/<cite[^>]*>/i.test(html)) {
+    // Has cite elements — check if our URL is in any of them
+    const citeRe = /<cite[^>]*>([\s\S]*?)<\/cite>/gi;
+    let m;
+    while ((m = citeRe.exec(html)) !== null) {
+      const t = m[1].replace(/<[^>]+>/g, "").replace(/\s+/g, "").toLowerCase();
+      if (t.includes(norm)) return { url, indexed: true };
+    }
+  }
+
+  // Layer 4: Fallback — if no "no results" patterns, assume indexed
+  // The site: operator only returns a page with content for indexed URLs
+  return { url, indexed: true };
 }
 
 // === Sitemap Import (via background SW to bypass CORS) ===
@@ -316,10 +352,8 @@ async function importSitemap() {
       return;
     }
 
-    // Append to bulk textarea
-    const existing = $("#bulkInput").value.trim();
-    const newUrls = urls.join("\n");
-    $("#bulkInput").value = existing ? existing + "\n" + newUrls : newUrls;
+    // Replace bulk textarea with imported URLs (don't append to old ones)
+    $("#bulkInput").value = urls.join("\n");
     updateUrlCount();
     hint.textContent = `✓ Imported ${urls.length} URLs`;
     hint.className = "hint success";
@@ -510,7 +544,9 @@ function updateProgress(current, total, text) {
 
 function showCaptchaNotice() {
   $("#captchaNotice").classList.remove("hidden");
-  chrome.tabs.create({ url: "https://www.google.com/search?q=test", active: true });
+  // Open Google in a new tab so user can solve CAPTCHA there.
+  // Once solved, the browser session cookie allows future requests.
+  chrome.tabs.create({ url: "https://www.google.com/", active: true });
 }
 
 // === Affiliate Nudge ===
