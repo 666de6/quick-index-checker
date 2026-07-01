@@ -165,7 +165,7 @@ async function checkPage() {
     showAffiliateNudge(state.results);
   } catch (err) {
     if (err.message === "CAPTCHA") {
-      showCaptchaNotice();
+      showCaptchaNotice(state.currentUrl);
     } else {
       showError(err.message);
     }
@@ -213,7 +213,7 @@ async function checkBulk() {
     } catch (err) {
       if (err.message === "CAPTCHA") {
         captchaTriggered = true;
-        showCaptchaNotice();
+        showCaptchaNotice(urls[i]);
         break;
       }
       state.results.push({ url: urls[i], indexed: false, error: err.message });
@@ -255,7 +255,7 @@ async function checkUrl(url) {
       Accept: "text/html,application/xhtml+xml",
       "Accept-Language": "en-US,en;q=0.9",
     },
-    credentials: "omit",
+    credentials: "include",
   });
 
   const html = await response.text();
@@ -542,11 +542,11 @@ function updateProgress(current, total, text) {
   if (text) $("#progressLabel").textContent = text;
 }
 
-function showCaptchaNotice() {
+function showCaptchaNotice(url) {
   $("#captchaNotice").classList.remove("hidden");
-  // Open Google in a new tab so user can solve CAPTCHA there.
-  // Once solved, the browser session cookie allows future requests.
-  chrome.tabs.create({ url: "https://www.google.com/", active: true });
+  // Open the actual Google search that triggered CAPTCHA so user can solve it there.
+  const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en`;
+  chrome.tabs.create({ url: searchUrl, active: true });
 }
 
 // === Affiliate Nudge ===
