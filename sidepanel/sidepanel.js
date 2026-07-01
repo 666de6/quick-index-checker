@@ -55,7 +55,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#checkBulkBtn").addEventListener("click", checkBulk);
   $("#exportCsvBtn").addEventListener("click", exportCsv);
   $("#clearResultsBtn").addEventListener("click", clearResults);
-  $("#captchaDismiss").addEventListener("click", () => $("#captchaNotice").classList.add("hidden"));
+  $("#captchaDismiss").addEventListener("click", () => {
+    $("#captchaNotice").classList.add("hidden");
+    // Remove retry button so it gets recreated fresh next time
+    const rb = $("#captchaNotice").querySelector(".notice-retry");
+    if (rb) rb.remove();
+  });
   $("#importSitemapBtn").addEventListener("click", importSitemap);
   $("#clearHistoryBtn").addEventListener("click", clearHistory);
   $("#refreshPageBtn").addEventListener("click", refreshPage);
@@ -162,10 +167,9 @@ async function checkPage() {
     state.results = [result];
     showResults("page");
     saveToHistory(state.results, "page");
-    showAffiliateNudge(state.results);
   } catch (err) {
     if (err.message === "CAPTCHA") {
-      showCaptchaNotice(state.currentUrl);
+      showCaptchaNotice(state.currentUrl, () => checkPage());
     } else {
       showError(err.message);
     }
@@ -202,8 +206,6 @@ async function checkBulk() {
   progress.classList.remove("hidden");
   updateProgress(0, urls.length);
 
-  let captchaTriggered = false;
-
   for (let i = 0; i < urls.length; i++) {
     updateProgress(i, urls.length, `Checking ${i + 1} of ${urls.length}…`);
 
@@ -212,14 +214,13 @@ async function checkBulk() {
       state.results.push(result);
     } catch (err) {
       if (err.message === "CAPTCHA") {
-        captchaTriggered = true;
-        showCaptchaNotice(urls[i]);
+        showCaptchaNotice(urls[i], () => checkBulk());
         break;
       }
       state.results.push({ url: urls[i], indexed: false, error: err.message });
     }
 
-    if (i < urls.length - 1 && !captchaTriggered) {
+    if (i < urls.length - 1) {
       await sleep(getDelay(i));
     }
   }
@@ -232,86 +233,85 @@ async function checkBulk() {
   if (state.results.length > 0) {
     showResults("bulk");
     saveToHistory(state.results, "bulk");
-    showAffiliateNudge(state.results);
   }
 }
 
-// === Check Single URL (site: search via gbv=1 server-rendered HTML) ===
-// gbv=1 forces Google to return server-rendered HTML (no JS required).
-// This is critical: without gbv=1, fetch() gets a JS skeleton with no result text.
-//
-// Detection logic (layered, most reliable first):
-//   1. Explicit "no results" text → NOT indexed
-//   2. Positive result indicators (id="search", class="g", etc.) → indexed
-//   3. Cite tag contains URL → indexed
-//   4. Fallback: if no "no results" text found, lean indexed
+// === Check Single URL (via real Chrome tab — reads rendered DOM) ===
+// Why tab instead of fetch(): fetch() gets a JS skeleton without search results.
+// A real tab renders the full Google page, so document.body.innerText ALWAYS
+// contains either search results or "did not match any documents".
+const CHECK_TAB_TIMEOUT = 12000; // 12 seconds max for Google to load
+
 async function checkUrl(url) {
-  const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en&gbv=1`;
+  const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en`;
 
-  const response = await fetch(searchUrl, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-      Accept: "text/html,application/xhtml+xml",
-      "Accept-Language": "en-US,en;q=0.9",
-    },
-    credentials: "include",
+  return new Promise((resolve, reject) => {
+    chrome.tabs.create({ url: searchUrl, active: false }, (tab) => {
+      let settled = false;
+
+      const timeout = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        chrome.tabs.onUpdated.removeListener(listener);
+        chrome.tabs.remove(tab.id).catch(() => {});
+        reject(new Error("CAPTCHA")); // Timeout usually means CAPTCHA
+      }, CHECK_TAB_TIMEOUT);
+
+      const listener = (tabId, changeInfo) => {
+        if (tabId !== tab.id || changeInfo.status !== "complete") return;
+        clearTimeout(timeout);
+        chrome.tabs.onUpdated.removeListener(listener);
+
+        // Wait a beat for Google's JS to finish rendering
+        setTimeout(async () => {
+          if (settled) return;
+          settled = true;
+
+          try {
+            const results = await chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: () => {
+                const body = (document.body?.innerText || "").toLowerCase();
+                const title = (document.title || "").toLowerCase();
+
+                // CAPTCHA check first
+                if (
+                  body.includes("unusual traffic") ||
+                  body.includes("verify you're not a robot") ||
+                  body.includes("sorry") && body.includes("automated")
+                ) {
+                  return { captcha: true };
+                }
+
+                // Explicit "no results" patterns
+                const noResults =
+                  body.includes("did not match any documents") ||
+                  body.includes("no results found for") ||
+                  (body.includes("your search") && body.includes("did not match")) ||
+                  title.includes("no results found");
+
+                return { noResults, captcha: false };
+              },
+            });
+
+            await chrome.tabs.remove(tab.id).catch(() => {});
+
+            const r = results[0]?.result;
+            if (r?.captcha) {
+              reject(new Error("CAPTCHA"));
+            } else {
+              resolve({ url, indexed: !r?.noResults });
+            }
+          } catch (e) {
+            await chrome.tabs.remove(tab.id).catch(() => {});
+            reject(new Error(e.message));
+          }
+        }, 1500); // 1.5s for JS rendering
+      };
+
+      chrome.tabs.onUpdated.addListener(listener);
+    });
   });
-
-  const html = await response.text();
-
-  // CAPTCHA detection
-  if (
-    html.includes("unusual traffic") ||
-    html.includes("captcha") ||
-    html.includes("recaptcha") ||
-    html.includes("g-recaptcha") ||
-    response.status === 429
-  ) {
-    throw new Error("CAPTCHA");
-  }
-
-  // Layer 1: Explicit "no results" patterns
-  // Google displays these in the page body when nothing is indexed
-  const noResults =
-    html.includes("did not match any documents") ||
-    html.includes("No results found for") ||
-    html.includes("did not match any") ||
-    (html.includes("Your search") && html.includes("did not match"));
-
-  if (noResults) {
-    return { url, indexed: false };
-  }
-
-  // Layer 2: Positive indicators — Google result page structure
-  const hasResults =
-    html.includes('id="search"') ||
-    html.includes('class="g "') ||
-    html.includes('id="rso"') ||
-    html.includes('id="result-stats"') ||
-    html.includes('<h3 class="') ||
-    html.includes('data-hveid');
-
-  if (hasResults) {
-    return { url, indexed: true };
-  }
-
-  // Layer 3: Check if URL appears in cite/result area
-  // This catches cases where Google shows results but without the standard DOM structure
-  const norm = normalizeUrl(url);
-  if (/<cite[^>]*>/i.test(html)) {
-    // Has cite elements — check if our URL is in any of them
-    const citeRe = /<cite[^>]*>([\s\S]*?)<\/cite>/gi;
-    let m;
-    while ((m = citeRe.exec(html)) !== null) {
-      const t = m[1].replace(/<[^>]+>/g, "").replace(/\s+/g, "").toLowerCase();
-      if (t.includes(norm)) return { url, indexed: true };
-    }
-  }
-
-  // Layer 4: Fallback — if no "no results" patterns, assume indexed
-  // The site: operator only returns a page with content for indexed URLs
-  return { url, indexed: true };
 }
 
 // === Sitemap Import (via background SW to bypass CORS) ===
@@ -455,16 +455,6 @@ function formatTime(ts) {
 }
 
 // === Helpers ===
-function normalizeUrl(url) {
-  try {
-    const u = new URL(url);
-    let path = u.pathname.replace(/\/+$/, "") || "/";
-    return (u.hostname + path).toLowerCase();
-  } catch {
-    return url.toLowerCase();
-  }
-}
-
 function getDelay(index) {
   return Math.min(1500 + index * 80, 3000);
 }
@@ -542,11 +532,35 @@ function updateProgress(current, total, text) {
   if (text) $("#progressLabel").textContent = text;
 }
 
-function showCaptchaNotice(url) {
-  $("#captchaNotice").classList.remove("hidden");
-  // Open the actual Google search that triggered CAPTCHA so user can solve it there.
+function showCaptchaNotice(url, onRetry) {
+  // Open the Google search that needs CAPTCHA solved
   const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en`;
   chrome.tabs.create({ url: searchUrl, active: true });
+
+  const notice = $("#captchaNotice");
+  notice.classList.remove("hidden");
+
+  // Add retry button if callback provided
+  let retryBtn = notice.querySelector(".notice-retry");
+  if (onRetry) {
+    if (!retryBtn) {
+      retryBtn = document.createElement("button");
+      retryBtn.className = "btn btn-sm btn-primary notice-retry";
+      retryBtn.style.cssText = "margin-top:8px;width:auto;padding:6px 14px;font-size:12px";
+      retryBtn.textContent = "Try Again";
+      retryBtn.addEventListener("click", () => {
+        notice.classList.add("hidden");
+        onRetry();
+      });
+      notice.querySelector(".notice-body").appendChild(retryBtn);
+    }
+    retryBtn.onclick = () => {
+      notice.classList.add("hidden");
+      onRetry();
+    };
+  }
+
+  // Dismiss button is handled by the init addEventListener above
 }
 
 // === Affiliate Nudge ===
