@@ -57,9 +57,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#clearResultsBtn").addEventListener("click", clearResults);
   $("#captchaDismiss").addEventListener("click", () => {
     $("#captchaNotice").classList.add("hidden");
-    // Remove retry button so it gets recreated fresh next time
-    const rb = $("#captchaNotice").querySelector(".notice-retry");
-    if (rb) rb.remove();
+    // Clean up any action buttons
+    const body = $("#captchaNotice").querySelector(".notice-body");
+    if (body) body.querySelectorAll(".notice-action").forEach((el) => el.remove());
   });
   $("#importSitemapBtn").addEventListener("click", importSitemap);
   $("#clearHistoryBtn").addEventListener("click", clearHistory);
@@ -169,7 +169,7 @@ async function checkPage() {
     saveToHistory(state.results, "page");
   } catch (err) {
     if (err.message === "CAPTCHA") {
-      showCaptchaNotice(state.currentUrl, () => checkPage());
+      showCaptchaNotice(state.currentUrl, "single");
     } else {
       showError(err.message);
     }
@@ -180,6 +180,10 @@ async function checkPage() {
 }
 
 // === Check Bulk URLs ===
+// Stores state so user can resume after solving CAPTCHA
+let bulkResume = null; // { urls, index, total }
+let bulkTotal = 0;     // preserved total for progress bar after resume
+
 async function checkBulk() {
   if (state.isChecking) return;
 
@@ -197,16 +201,40 @@ async function checkBulk() {
   }
 
   state.results = [];
+  bulkResume = null;
+  bulkTotal = urls.length;
   const btn = $("#checkBulkBtn");
   setLoading(btn, true);
   state.isChecking = true;
   clearResults();
 
+  await runBulkLoop(urls, 0);
+
+  finishBulk();
+}
+
+// Resume after CAPTCHA — continues from saved index
+async function continueBulk() {
+  if (!bulkResume) return;
+  const { urls, index } = bulkResume;
+  bulkResume = null;
+
+  const btn = $("#checkBulkBtn");
+  setLoading(btn, true);
+  state.isChecking = true;
+
+  // Restore progress bar
   const progress = $("#progressArea");
   progress.classList.remove("hidden");
-  updateProgress(0, urls.length);
+  updateProgress(index, urls.length);
 
-  for (let i = 0; i < urls.length; i++) {
+  await runBulkLoop(urls, index);
+
+  finishBulk();
+}
+
+async function runBulkLoop(urls, startIndex) {
+  for (let i = startIndex; i < urls.length; i++) {
     updateProgress(i, urls.length, `Checking ${i + 1} of ${urls.length}…`);
 
     try {
@@ -214,8 +242,14 @@ async function checkBulk() {
       state.results.push(result);
     } catch (err) {
       if (err.message === "CAPTCHA") {
-        showCaptchaNotice(urls[i], () => checkBulk());
-        break;
+        // Save state so user can resume after solving CAPTCHA
+        bulkResume = { urls, index: i, total: urls.length };
+        // Show partial results so user sees progress
+        showResults("bulk");
+        showCaptchaNotice(urls[i], "bulk");
+        setLoading($("#checkBulkBtn"), false);
+        state.isChecking = false;
+        return; // Stop here, user will continueBulk() after CAPTCHA
       }
       state.results.push({ url: urls[i], indexed: false, error: err.message });
     }
@@ -224,11 +258,16 @@ async function checkBulk() {
       await sleep(getDelay(i));
     }
   }
+}
 
-  updateProgress(urls.length, urls.length, "Done");
-  setTimeout(() => progress.classList.add("hidden"), 600);
-  setLoading(btn, false);
+function finishBulk() {
+  const total = bulkTotal || state.results.length;
+  updateProgress(total, total, "Done");
+  setTimeout(() => $("#progressArea").classList.add("hidden"), 600);
+  setLoading($("#checkBulkBtn"), false);
   state.isChecking = false;
+  bulkResume = null;
+  bulkTotal = 0;
 
   if (state.results.length > 0) {
     showResults("bulk");
@@ -532,35 +571,65 @@ function updateProgress(current, total, text) {
   if (text) $("#progressLabel").textContent = text;
 }
 
-function showCaptchaNotice(url, onRetry) {
-  // Open the Google search that needs CAPTCHA solved
+function showCaptchaNotice(url, mode) {
+  // Open the Google search where CAPTCHA appears
   const searchUrl = `https://www.google.com/search?q=site:${encodeURIComponent(url)}&hl=en`;
   chrome.tabs.create({ url: searchUrl, active: true });
 
   const notice = $("#captchaNotice");
-  notice.classList.remove("hidden");
+  const body = notice.querySelector(".notice-body");
 
-  // Add retry button if callback provided
-  let retryBtn = notice.querySelector(".notice-retry");
-  if (onRetry) {
-    if (!retryBtn) {
-      retryBtn = document.createElement("button");
-      retryBtn.className = "btn btn-sm btn-primary notice-retry";
-      retryBtn.style.cssText = "margin-top:8px;width:auto;padding:6px 14px;font-size:12px";
-      retryBtn.textContent = "Try Again";
-      retryBtn.addEventListener("click", () => {
-        notice.classList.add("hidden");
-        onRetry();
-      });
-      notice.querySelector(".notice-body").appendChild(retryBtn);
-    }
-    retryBtn.onclick = () => {
+  // Clear previous action buttons
+  body.querySelectorAll(".notice-action").forEach((el) => el.remove());
+
+  if (mode === "bulk" && bulkResume) {
+    const { index, total } = bulkResume;
+    body.innerHTML = `
+      <strong>Verification needed</strong>
+      <p>Checked <b>${index}</b> of <b>${total}</b> URLs so far.<br>
+      CAPTCHA triggered at: <code>${escapeHtml(url)}</code><br>
+      Complete the verification in the opened tab, then continue.</p>
+    `;
+
+    const continueBtn = mkBtn("Continue Checking", "notice-action btn btn-sm btn-primary", () => {
       notice.classList.add("hidden");
-      onRetry();
-    };
+      continueBulk();
+    });
+    body.appendChild(continueBtn);
+
+    const skipBtn = mkBtn("Dismiss", "notice-action btn btn-sm btn-ghost", () => {
+      notice.classList.add("hidden");
+      bulkResume = null;
+      bulkTotal = 0;
+      $("#progressArea").classList.add("hidden");
+      setLoading($("#checkBulkBtn"), false);
+      state.isChecking = false;
+    });
+    body.appendChild(skipBtn);
+  } else {
+    body.innerHTML = `
+      <strong>Verification needed</strong>
+      <p>Google asks for a one-time CAPTCHA.<br>
+      Complete the verification in the opened tab, then try again.</p>
+    `;
+
+    const retryBtn = mkBtn("Try Again", "notice-action btn btn-sm btn-primary", () => {
+      notice.classList.add("hidden");
+      checkPage();
+    });
+    body.appendChild(retryBtn);
   }
 
-  // Dismiss button is handled by the init addEventListener above
+  notice.classList.remove("hidden");
+}
+
+function mkBtn(text, className, onClick) {
+  const btn = document.createElement("button");
+  btn.textContent = text;
+  btn.className = className;
+  btn.style.cssText = "margin-top:8px;width:auto;padding:6px 14px;font-size:12px;margin-right:6px";
+  btn.addEventListener("click", onClick);
+  return btn;
 }
 
 // === Affiliate Nudge ===
