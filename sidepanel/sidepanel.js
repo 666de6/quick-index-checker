@@ -377,7 +377,7 @@ function parseSitemapXml(xml) {
 }
 
 // === History ===
-const HISTORY_KEY = "";
+const HISTORY_KEY = "qic_history";
 const MAX_HISTORY = 200;
 
 async function saveToHistory(results, source) {
