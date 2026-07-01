@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <img class="brand-logo" src="../icons/icon-32.png" alt="QIC" width="24" height="24">
+        <div>
+          <h1 class="brand-name">Quick Index Checker</h1>
+          <span class="brand-sub">Free &amp; Private</span>
+        </div>
+      </div>
+      <button id="settingsBtn" class="btn-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Tab Bar -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="page">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Page
+      </button>
+      <button class="tab" data-tab="bulk">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Bulk
+      </button>
+      <button class="tab" data-tab="history">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History
+      </button>
+    </nav>
+
+    <!-- Body -->
+    <main class="body">
+
+      <!-- === PAGE TAB === -->
+      <section id="tab-page" class="tab-panel active">
+        <div class="card">
+          <div class="page-head">
+            <label class="label">Current Page</label>
+            <button id="refreshPageBtn" class="btn-icon btn-icon-sm" title="Refresh current page info">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </button>
+          </div>
+          <div class="url-box" id="currentUrl">—</div>
+        </div>
+
+        <!-- Noindex detection -->
+        <div id="pageAnalysis" class="page-analysis hidden">
+          <span id="noindexBadge"></span>
+        </div>
+
+        <button id="checkPageBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Check Index Status
+        </button>
+      </section>
+
+      <!-- === BULK TAB === -->
+      <section id="tab-bulk" class="tab-panel">
+        <div class="card">
+          <label class="label">Import from Sitemap</label>
+          <div class="sitemap-row">
+            <input id="sitemapUrl" class="input" type="text" placeholder="https://yoursite.com/sitemap.xml">
+            <button id="importSitemapBtn" class="btn btn-outline btn-sm">Import</button>
+          </div>
+          <span class="hint" id="sitemapHint"></span>
+        </div>
+
+        <div class="card">
+          <label class="label">Paste URLs — one per line</label>
+          <textarea id="bulkInput" class="textarea" placeholder="https://example.com/page1&#10;https://example.com/page2&#10;https://example.com/page3" rows="6"></textarea>
+          <div class="url-count" id="urlCount">0 URLs</div>
+        </div>
+        <button id="checkBulkBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Check All URLs
+        </button>
+      </section>
+
+      <!-- === HISTORY TAB === -->
+      <section id="tab-history" class="tab-panel">
+        <div class="history-actions">
+          <button id="clearHistoryBtn" class="btn btn-ghost btn-sm">Clear All</button>
+        </div>
+        <div id="historyList" class="history-list">
+          <div class="empty-state">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <p>No checks yet</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress -->
+      <div id="progressArea" class="progress-area hidden">
+        <div class="progress-text">
+          <span id="progressLabel">Checking…</span>
+          <span id="progressCount">0/0</span>
+        </div>
+        <div class="progress-track">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- CAPTCHA -->
+      <div id="captchaNotice" class="notice notice-warn hidden">
+        <span class="notice-icon">🛡️</span>
+        <div class="notice-body">
+          <strong>Verification needed</strong>
+          <p>Google asks for a one-time CAPTCHA. Complete it in the opened tab and come back.</p>
+        </div>
+        <button id="captchaDismiss" class="btn-icon btn-icon-sm">✕</button>
+      </div>
+
+      <!-- Results -->
+      <section id="resultsArea" class="results-area hidden">
+        <div class="results-head">
+          <h2 class="results-title">Results</h2>
+          <div class="results-actions">
+            <button id="exportCsvBtn" class="btn btn-outline">Export CSV</button>
+            <button id="clearResultsBtn" class="btn btn-ghost">Clear</button>
+          </div>
+        </div>
+        <div class="results-summary" id="resultsSummary"></div>
+        <div class="results-list" id="resultsList"></div>
+      </section>
+
+      <!-- Affiliate -->
+      <div id="affiliateNudge" class="affiliate hidden"></div>
+    </main>
+
+    <footer class="footer">
+      <span>No data collected · All checks via Google</span>
+    </footer>
+  </div>
+
+  <script src="sidepanel.js" type="module"></script>
+</body>
+</html>

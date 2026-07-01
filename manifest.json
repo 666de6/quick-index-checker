@@ -4,18 +4,21 @@
   "version": "1.0.0",
   "description": "Instantly check if any URL is indexed by Google. Right-click, paste bulk URLs, export results — all free, no signup needed.",
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
   },
   "action": {
-    "default_popup": "popup/popup.html",
+    "default_title": "Quick Index Checker",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
     }
   },
   "background": {
@@ -26,6 +29,6 @@
     "page": "options/options.html",
     "open_in_tab": false
   },
-  "permissions": ["activeTab", "contextMenus", "storage"],
+  "permissions": ["activeTab", "contextMenus", "storage", "sidePanel", "scripting"],
   "host_permissions": ["https://www.google.com/*"]
 }

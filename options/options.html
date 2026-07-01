@@ -7,34 +7,142 @@
   <style>
     :root {
       --primary: #767F9E;
-      --bg: #E8DDB4;
-      --text: #1f1f1f;
-      --text-muted: #5f6368;
+      --primary-hover: #5f6885;
+      --primary-light: #e8eaf1;
+      --secondary: #DAA464;
+      --tertiary: #DEC384;
+      --bg: #faf8f2;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border: #e5e7eb;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: var(--font);
       background: var(--bg);
       color: var(--text);
-      padding: 40px;
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
     }
-    h1 { font-size: 24px; margin-bottom: 8px; }
-    p { color: var(--text-muted); font-size: 14px; }
-    hr { border: none; border-top: 1px solid #d0c8a8; margin: 24px 0; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .version {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 2px 8px;
+      border-radius: 100px;
+      margin-top: 4px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 0;
+      transition: color 0.15s;
+    }
+    .link:hover { color: var(--primary-hover); }
+    .link svg { width: 14px; height: 14px; }
+
+    .footer-note {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
-  <h1>Quick Index Checker</h1>
-  <p>v1.0.0 — Free &amp; Private. No signup required.</p>
-  <hr>
-  <p>
-    This extension runs entirely in your browser. No data is collected, stored, or sent to any server except
-    Google's search engine (to check indexing status).
-  </p>
-  <p style="margin-top:16px">
-    <a href="https://666de6.github.io/quick-index-checker/privacy/privacy.html" target="_blank">Privacy Policy</a>
-  </p>
+  <div class="card">
+    <div class="header">
+      <div>
+        <h1>Quick Index Checker</h1>
+        <span class="version">v1.0.0</span>
+      </div>
+    </div>
+
+    <p>Free &amp; Private. No signup required.</p>
+
+    <hr>
+
+    <div class="section-title">How It Works</div>
+    <p>
+      Checks Google's search results for <code>site:your-url</code> to determine if a page is indexed.
+      Everything runs in your browser — no data is collected, stored, or sent to any third party.
+    </p>
+    <p>
+      The only external request is to Google's search engine (required to check indexing status).
+    </p>
+
+    <hr>
+
+    <div class="section-title">Legal</div>
+    <a class="link" href="https://666de6.github.io/quick-index-checker/privacy/privacy.html" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Privacy Policy
+    </a>
+
+    <p class="footer-note">Quick Index Checker is not affiliated with Google.</p>
+  </div>
 </body>
 </html>

@@ -5,73 +5,172 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quick Index Checker — Privacy Policy</title>
   <style>
-    :root { --primary: #767F9E; --bg: #E8DDB4; --text: #1f1f1f; --text-muted: #5f6368; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg); color: var(--text); max-width: 720px;
-      margin: 0 auto; padding: 40px 24px; line-height: 1.8;
+    :root {
+      --primary: #767F9E;
+      --primary-light: #e8eaf1;
+      --bg: #faf8f2;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     }
-    h1 { font-size: 28px; margin-bottom: 4px; }
-    .subtitle { color: var(--text-muted); margin-bottom: 32px; }
-    h2 { font-size: 18px; margin-top: 28px; margin-bottom: 8px; }
-    p { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
-    ul { font-size: 14px; color: var(--text-muted); padding-left: 20px; margin-bottom: 12px; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 40px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .last-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+    p {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    ul {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
     li { margin-bottom: 4px; }
-    hr { border: none; border-top: 1px solid #d0c8a8; margin: 32px 0; }
-    .last-updated { font-size: 12px; color: var(--text-muted); }
+    code {
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 12px;
+      background: var(--primary-light);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--primary);
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover { text-decoration: underline; }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    .footer-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    strong { color: var(--text); }
   </style>
 </head>
 <body>
-  <h1>Privacy Policy</h1>
-  <p class="subtitle">Quick Index Checker Chrome Extension</p>
-  <p class="last-updated">Last updated: June 26, 2026</p>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Privacy Policy</h1>
+      </div>
+    </div>
+    <p class="last-updated">Quick Index Checker · Last updated: June 26, 2026</p>
 
-  <h2>Summary</h2>
-  <p>Quick Index Checker is a free Chrome extension that checks whether URLs are indexed by Google Search. <strong>We do not collect, store, or transmit any personal data.</strong> Everything runs locally in your browser.</p>
+    <h2>Summary</h2>
+    <p>Quick Index Checker is a free Chrome extension that checks whether URLs are indexed by Google Search. <strong>We do not collect, store, or transmit any personal data.</strong> Everything runs locally in your browser.</p>
 
-  <h2>Data Collection</h2>
-  <p>This extension <strong>does not</strong> collect or transmit any of the following:</p>
-  <ul>
-    <li>Personal information (name, email, etc.)</li>
-    <li>Browsing history or activity</li>
-    <li>URLs you check (they are processed locally and never sent to our servers)</li>
-    <li>Cookies or tracking identifiers</li>
-    <li>Analytics or crash reports</li>
-  </ul>
+    <h2>Data Collection</h2>
+    <p>This extension <strong>does not</strong> collect or transmit:</p>
+    <ul>
+      <li>Personal information (name, email, etc.)</li>
+      <li>Browsing history or activity</li>
+      <li>URLs you check (processed locally, never sent to any server we control)</li>
+      <li>Cookies or tracking identifiers</li>
+      <li>Analytics or crash reports</li>
+    </ul>
 
-  <h2>How It Works</h2>
-  <p>
-    When you check a URL's indexing status, the extension sends a search query
-    (<code>site:your-url</code>) directly to Google's search engine from your browser —
-    exactly as if you typed it into Google.com yourself.
-    Google may process this query according to their own <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a>.
-    The extension does not intercept, log, or store these queries on any server we control.
-  </p>
+    <h2>How It Works</h2>
+    <p>
+      When you check a URL's indexing status, the extension sends a search query
+      (<code>site:your-url</code>) directly to Google's search engine from your browser —
+      exactly as if you typed it into Google.com yourself.
+    </p>
+    <p>
+      Google may process this query according to their own
+      <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a>.
+      The extension does not intercept, log, or store these queries on any server we control.
+    </p>
 
-  <h2>Data Storage</h2>
-  <p>The extension uses <code>chrome.storage.local</code> solely for optional features such as:</p>
-  <ul>
-    <li>Pending check URL (passed from right-click context menu to the popup; cleared immediately)</li>
-    <li>Future V2 features: check history and user preferences (stored locally only)</li>
-  </ul>
-  <p>All storage is local to your browser. We have no access to it.</p>
+    <h2>Local Storage</h2>
+    <p>The extension uses <code>chrome.storage.local</code> solely for:</p>
+    <ul>
+      <li>Pending check URL (passed from right-click context menu; cleared on read)</li>
+      <li>Check history and preferences (stored locally only, never transmitted)</li>
+    </ul>
 
-  <h2>Permissions</h2>
-  <p>The extension requires the following permissions:</p>
-  <ul>
-    <li><strong>activeTab</strong> — To read the current page URL when you click the extension icon</li>
-    <li><strong>contextMenus</strong> — To add the "Check if indexed" right-click option</li>
-    <li><strong>storage</strong> — For local-only feature storage (history, preferences)</li>
-    <li><strong>host_permissions (google.com)</strong> — To send indexing queries to Google Search</li>
-  </ul>
+    <h2>Permissions</h2>
+    <ul>
+      <li><strong>activeTab</strong> — Read current page URL when you activate the extension</li>
+      <li><strong>contextMenus</strong> — Add right-click "Check if indexed" option</li>
+      <li><strong>storage</strong> — Local-only history and preferences</li>
+      <li><strong>scripting</strong> — Detect noindex meta tags on the current page</li>
+      <li><strong>sidePanel</strong> — Display the extension as a side panel drawer</li>
+      <li><strong>google.com</strong> — Send indexing queries to Google Search</li>
+    </ul>
 
-  <h2>Third-Party Services</h2>
-  <p>When checking a URL, the extension sends a request to <strong>google.com</strong>. Google's use of that request data is governed by <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>.</p>
+    <h2>Third-Party Services</h2>
+    <p>The only external request is to <strong>google.com</strong> (to check indexing). Google's use of request data is governed by
+    <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>.</p>
 
-  <h2>Contact</h2>
-  <p>If you have questions, please open an issue on the <a href="https://github.com/666de6/quick-index-checker" target="_blank">GitHub repository</a>.</p>
+    <h2>Contact</h2>
+    <p>
+      Questions? Open an issue on the
+      <a href="https://github.com/666de6/quick-index-checker" target="_blank">GitHub repository</a>
+      or email <a href="mailto:support@pridepfp.com">support@pridepfp.com</a>.
+    </p>
 
-  <hr>
-  <p class="last-updated">Quick Index Checker — Free. Private. No catch.</p>
+    <hr>
+    <p class="footer-note">Quick Index Checker — Free. Private. No catch.</p>
+  </div>
 </body>
 </html>
