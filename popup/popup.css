@@ -300,23 +300,25 @@ body {
 .affiliate-nudge {
   margin: 0 16px 12px;
   padding: 10px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #fff8e1, #fff3cd);
+  border: 1px solid var(--secondary);
   border-radius: var(--radius-sm);
 }
 .affiliate-item:not(:last-child) {
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(218,164,100,0.25);
 }
 .affiliate-text {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #6d4f1e;
   line-height: 1.5;
   margin-bottom: 8px;
 }
 .affiliate-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: var(--primary);
   color: #fff !important;
   font-weight: 600;
@@ -329,6 +331,9 @@ body {
 .affiliate-btn:hover {
   background: var(--primary-hover);
   text-decoration: none !important;
+}
+.affiliate-arrow {
+  flex-shrink: 0;
 }
 
 /* Footer */

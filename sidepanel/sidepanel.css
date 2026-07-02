@@ -488,8 +488,8 @@ html, body {
 
 /* ========== Affiliate ========== */
 .affiliate {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--secondary-light), #fff8ec);
+  border: 1px solid var(--secondary);
   border-radius: var(--radius);
   padding: 12px 14px;
   font-size: 12px;
@@ -498,14 +498,16 @@ html, body {
 .affiliate-item:not(:last-child) {
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(218,164,100,0.25);
 }
 .affiliate-text {
-  color: var(--text-secondary);
+  color: #7c5e1a;
   margin-bottom: 8px;
 }
 .affiliate-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: var(--primary);
   color: #fff !important;
   font-weight: 600;
@@ -518,6 +520,9 @@ html, body {
 .affiliate-btn:hover {
   background: var(--primary-hover);
   text-decoration: none !important;
+}
+.affiliate-arrow {
+  flex-shrink: 0;
 }
 
 /* ========== Footer ========== */

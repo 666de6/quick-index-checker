@@ -332,7 +332,7 @@ async function checkUrl(url) {
 
 // === Sitemap Import (via background SW to bypass CORS) ===
 async function importSitemap() {
-  const url = $("#sitemapUrl").value.trim();
+  let url = $("#sitemapUrl").value.trim();
   const hint = $("#sitemapHint");
 
   if (!url) {
@@ -620,14 +620,14 @@ function showAffiliateNudge(results) {
   let html = `
     <div class="affiliate-item">
       <div class="affiliate-text">AI Overviews, ChatGPT, Gemini talking about your brand? Try Indexly to track AI search visibility.</div>
-      <a class="affiliate-btn" href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">${AFFILIATE.indexly.name}</a>
+      <a class="affiliate-btn" href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">${AFFILIATE.indexly.name} <svg class="affiliate-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg></a>
     </div>`;
 
   if (hasUnindexed) {
     html = `
     <div class="affiliate-item">
       <div class="affiliate-text">Want to submit unindexed pages or monitor indexing changes? Use Rapid Index Checker for batch submission & tracking.</div>
-      <a class="affiliate-btn" href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">${AFFILIATE.rapidIndexChecker.name}</a>
+      <a class="affiliate-btn" href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">${AFFILIATE.rapidIndexChecker.name} <svg class="affiliate-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg></a>
     </div>
     ` + html;
   }
