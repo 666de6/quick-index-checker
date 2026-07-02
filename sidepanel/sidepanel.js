@@ -3,17 +3,17 @@
 
 // === Affiliate Config ===
 const AFFILIATE = {
-  indexMachine: {
-    enabled: false,
-    name: "IndexMachine",
-    url: "https://indexmachine.co/?ref=YOUR_ID",
-    desc: "Bulk check + auto-index your URLs — one-time $12.50 lifetime deal",
+  rapidIndexChecker: {
+    enabled: true,
+    name: "Rapid Index Checker",
+    url: "https://rapidindexchecker.com/?via=ada621",
+    desc: "For SEO teams: check thousands of URLs for Google index status, track indexing changes, diagnose indexability issues.",
   },
   indexly: {
-    enabled: false,
+    enabled: true,
     name: "Indexly",
-    url: "https://indexly.ai/?ref=YOUR_ID",
-    desc: "Monitor 1000s of URLs, get alerts when pages drop from index",
+    url: "https://indexly.ai/?aff=ada",
+    desc: "AI Search Visibility Platform. Track how ChatGPT, Gemini, Perplexity, Grok, Claude & AI Overviews talk about your brand.",
   },
 };
 
@@ -518,6 +518,9 @@ function showResults(source) {
     `
     )
     .join("");
+
+  // Show affiliate recommendations
+  showAffiliateNudge(state.results);
 }
 
 function showError(msg) {
@@ -612,23 +615,28 @@ function mkBtn(text, className, onClick) {
 // === Affiliate Nudge ===
 function showAffiliateNudge(results) {
   const notIndexed = results.filter((r) => !r.indexed && !r.error);
-  if (notIndexed.length === 0) return;
+  const hasUnindexed = notIndexed.length > 0;
 
-  let offer;
-  if (notIndexed.length >= 5) {
-    offer = AFFILIATE.indexly;
-  } else {
-    offer = AFFILIATE.indexMachine;
+  let html = `
+    <div class="affiliate-item">
+      <strong>🤖 AI Visibility</strong>
+      <a href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">Indexly</a>
+      — Track how ChatGPT, Gemini, Perplexity & AI Overviews talk about your brand
+    </div>`;
+
+  if (hasUnindexed) {
+    html = `
+    <div class="affiliate-item">
+      <strong>🔍 Bulk Index Diagnosis</strong>
+      <a href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">Rapid Index Checker</a>
+      — Check thousands of URLs for Google index status, track changes & diagnose issues
+    </div>
+    ` + html;
   }
-
-  if (!offer || !offer.enabled) return;
 
   const nudge = $("#affiliateNudge");
   nudge.classList.remove("hidden");
-  nudge.innerHTML = `
-    ⚡ <strong>${notIndexed.length}</strong> URL${notIndexed.length > 1 ? "s" : ""} not indexed.
-    <a href="${offer.url}" target="_blank">${offer.name}</a> — ${offer.desc}
-  `;
+  nudge.innerHTML = html;
 }
 
 // === Export CSV ===
