@@ -20,12 +20,16 @@ async function fetchWithRetry(url, retries) {
       lastError = err;
       if (err.name === "AbortError") {
         lastError = new Error(`Request timed out after ${FETCH_TIMEOUT / 1000}s`);
+        break;
       }
-      // Don't retry on abort — likely a real timeout, not transient
-      if (err.name === "AbortError") break;
+      // Small backoff before retry on transient network errors
+      if (attempt < retries - 1) {
+        await new Promise(r => setTimeout(r, 400));
+      }
     }
   }
-  throw lastError;
+  const msg = lastError?.message || String(lastError || "Unknown error");
+  throw new Error(msg);
 }
 
 // Open side panel when extension icon is clicked

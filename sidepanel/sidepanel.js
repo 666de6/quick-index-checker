@@ -350,20 +350,41 @@ async function importSitemap() {
   hint.className = "hint";
 
   try {
-    // Proxy through background service worker to avoid CORS
-    const resp = await chrome.runtime.sendMessage({
-      action: "fetchSitemap",
-      url,
-    });
+    // Proxy through background service worker to bypass CORS.
+    // MV3 service workers can be terminated while idle — sendMessage
+    // may fail if the SW hasn't re-registered its onMessage listener yet.
+    // Retry up to 3 times with backoff to handle the wake-up race.
+    let resp;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        resp = await chrome.runtime.sendMessage({
+          action: "fetchSitemap",
+          url,
+        });
+        if (resp) break; // Got a response
+      } catch (err) {
+        if (err.message?.includes("Could not establish connection") ||
+            err.message?.includes("receiving end does not exist")) {
+          // SW still waking up — wait and retry
+          if (attempt < 2) await sleep(400 + attempt * 200);
+          continue;
+        }
+        throw err; // Unexpected error — surface it
+      }
+    }
+
+    if (!resp) {
+      throw new Error("Service worker not responding. Try reloading the extension.");
+    }
 
     if (!resp.ok) {
-      throw new Error(resp.error || "Failed to fetch");
+      throw new Error(resp.error || "Failed to fetch sitemap");
     }
 
     const urls = parseSitemapXml(resp.text);
 
     if (urls.length === 0) {
-      hint.textContent = "No URLs found in sitemap";
+      hint.textContent = "No URLs found in sitemap. Check the URL or try a different sitemap.";
       hint.className = "hint error";
       return;
     }
