@@ -488,24 +488,36 @@ html, body {
 
 /* ========== Affiliate ========== */
 .affiliate {
-  background: linear-gradient(135deg, var(--secondary-light), #fff8ec);
-  border: 1px solid var(--secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 12px 14px;
   font-size: 12px;
-  line-height: 1.6;
-  color: #7c5e1a;
+  line-height: 1.5;
 }
-.affiliate a {
-  color: var(--primary);
-  font-weight: 700;
-  text-decoration: none;
-}
-.affiliate a:hover { text-decoration: underline; }
 .affiliate-item:not(:last-child) {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.affiliate-text {
+  color: var(--text-secondary);
   margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(218,164,100,0.25);
+}
+.affiliate-btn {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff !important;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  transition: background 0.15s;
+}
+.affiliate-btn:hover {
+  background: var(--primary-hover);
+  text-decoration: none !important;
 }
 
 /* ========== Footer ========== */

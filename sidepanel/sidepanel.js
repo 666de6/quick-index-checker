@@ -619,17 +619,15 @@ function showAffiliateNudge(results) {
 
   let html = `
     <div class="affiliate-item">
-      <strong>🤖 AI Visibility</strong>
-      <a href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">Indexly</a>
-      — Track how ChatGPT, Gemini, Perplexity & AI Overviews talk about your brand
+      <div class="affiliate-text">AI Overviews, ChatGPT, Gemini talking about your brand? Try Indexly to track AI search visibility.</div>
+      <a class="affiliate-btn" href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">${AFFILIATE.indexly.name}</a>
     </div>`;
 
   if (hasUnindexed) {
     html = `
     <div class="affiliate-item">
-      <strong>🔍 Bulk Index Diagnosis</strong>
-      <a href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">Rapid Index Checker</a>
-      — Check thousands of URLs for Google index status, track changes & diagnose issues
+      <div class="affiliate-text">Want to submit unindexed pages or monitor indexing changes? Use Rapid Index Checker for batch submission & tracking.</div>
+      <a class="affiliate-btn" href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">${AFFILIATE.rapidIndexChecker.name}</a>
     </div>
     ` + html;
   }

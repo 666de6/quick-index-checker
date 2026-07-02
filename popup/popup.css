@@ -300,21 +300,36 @@ body {
 .affiliate-nudge {
   margin: 0 16px 12px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #fff8e1, #fff3cd);
-  border: 1px solid var(--secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
-.nudge-text {
+.affiliate-item:not(:last-child) {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.affiliate-text {
   font-size: 12px;
-  color: #6d4f1e;
+  color: var(--text-secondary);
   line-height: 1.5;
+  margin-bottom: 8px;
 }
-.nudge-text a {
-  color: var(--primary);
+.affiliate-btn {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff !important;
   font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
   text-decoration: none;
+  transition: background 0.15s;
 }
-.nudge-text a:hover { text-decoration: underline; }
+.affiliate-btn:hover {
+  background: var(--primary-hover);
+  text-decoration: none !important;
+}
 
 /* Footer */
 .footer {

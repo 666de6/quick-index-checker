@@ -321,25 +321,23 @@ function showAffiliateNudge(results) {
   const hasUnindexed = notIndexed.length > 0;
 
   let html = `
-    <p class="nudge-text">
-      <strong>🤖 AI Visibility</strong>
-      <a href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">Indexly</a>
-      — Track how ChatGPT, Gemini, Perplexity & AI Overviews talk about your brand
-    </p>`;
+    <div class="affiliate-item">
+      <div class="affiliate-text">AI Overviews, ChatGPT, Gemini talking about your brand? Try Indexly to track AI search visibility.</div>
+      <a class="affiliate-btn" href="${AFFILIATE.indexly.url}" target="_blank" rel="noopener">${AFFILIATE.indexly.name}</a>
+    </div>`;
 
   if (hasUnindexed) {
     html = `
-    <p class="nudge-text" style="margin-bottom:6px">
-      <strong>🔍 Bulk Index Diagnosis</strong>
-      <a href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">Rapid Index Checker</a>
-      — Check thousands of URLs for Google index status, track changes & diagnose issues
-    </p>
+    <div class="affiliate-item">
+      <div class="affiliate-text">Want to submit unindexed pages or monitor indexing changes? Use Rapid Index Checker for batch submission & tracking.</div>
+      <a class="affiliate-btn" href="${AFFILIATE.rapidIndexChecker.url}" target="_blank" rel="noopener">${AFFILIATE.rapidIndexChecker.name}</a>
+    </div>
     ` + html;
   }
 
   const nudge = $("#affiliateNudge");
-  nudge.classList.remove("hidden");
   nudge.innerHTML = html;
+  nudge.classList.remove("hidden");
 }
 
 // === Export CSV ===
