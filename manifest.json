@@ -30,5 +30,5 @@
     "open_in_tab": false
   },
   "permissions": ["activeTab", "contextMenus", "storage", "sidePanel", "scripting"],
-  "host_permissions": ["https://www.google.com/*"]
+  "host_permissions": ["https://*/*"]
 }
