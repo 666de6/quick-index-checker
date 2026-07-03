@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.0.1 — 2026-07-03
+
+### Fixes
+- Sitemap import: fixed CORS error when fetching from domains without `Access-Control-Allow-Origin` header (e.g. pridepfp.com). Expanded host_permissions from `https://www.google.com/*` to `https://*/*` — MV3 requires host permission for fetch() to bypass CORS in the service worker.
+
+### Polish
+- Affiliate card: restored gold border styling, added ↗ arrow SVG icon to CTA buttons
+- Removed emoji from affiliate card
+
 ## v1.0.0 — 2026-07-01
 
 ### Features
