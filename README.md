@@ -23,10 +23,7 @@ All checks go directly from your browser to Google — we never see your URLs. N
 
 ## Install
 
-1. Clone this repo or download the ZIP
-2. Go to `chrome://extensions` → enable Developer Mode
-3. Click "Load unpacked" → select the extension folder
-4. Click the extension icon → side panel opens
+[Install Chrome extension ](https://chromewebstore.google.com/detail/quick-index-checker/cgffpijloblophcnacabhpfgboecgobl)
 
 ## Permissions
 
